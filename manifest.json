@@ -1,0 +1,9 @@
+{
+    "name": "Colección de Libros",
+    "short_name": "Libros",
+    "description": "Una colección de libros con detalles como título, autor e ISBN.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#007bff"
+}
