@@ -10,22 +10,22 @@ const CACHE_URLS = [
 ];
 
 // Instalar el Service Worker
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(function(cache) {
+            .then(function (cache) {
                 return cache.addAll(CACHE_URLS);
             })
     );
 });
 
 // Activar el Service Worker
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', function (event) {
     const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
-        caches.keys().then(function(cacheNames) {
+        caches.keys().then(function (cacheNames) {
             return Promise.all(
-                cacheNames.map(function(cacheName) {
+                cacheNames.map(function (cacheName) {
                     if (!cacheWhitelist.includes(cacheName)) {
                         return caches.delete(cacheName);
                     }
@@ -36,11 +36,16 @@ self.addEventListener('activate', function(event) {
 });
 
 // Manejar las peticiones de la aplicación
-self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', function (event) {
     event.respondWith(
         caches.match(event.request)
-            .then(function(response) {
+            .then(function (response) {
                 return response || fetch(event.request);
             })
     );
+});
+
+// Este es el truco para forzar la actualización del SW
+self.addEventListener('controllerchange', () => {
+    window.location.reload();
 });
