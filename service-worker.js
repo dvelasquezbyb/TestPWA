@@ -49,3 +49,57 @@ self.addEventListener('fetch', function (event) {
 self.addEventListener('controllerchange', () => {
     window.location.reload();
 });
+
+
+self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Forza la activación del nuevo SW inmediatamente
+    // Otras tareas de instalación, como cachear archivos
+});
+
+
+self.addEventListener('activate', (event) => {
+    const cacheWhitelist = ['my-cache-v2']; // Actualiza el nombre del caché
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (!cacheWhitelist.includes(cacheName)) {
+                        return caches.delete(cacheName); // Elimina cachés antiguos
+                    }
+                })
+            );
+        })
+    );
+});
+
+
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((cachedResponse) => {
+            const fetchPromise = fetch(event.request).then((networkResponse) => {
+                // Si la respuesta de la red es válida, actualizamos el caché
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, networkResponse.clone());
+                });
+                return networkResponse;
+            });
+
+            // Si ya hay algo en caché, lo devolvemos, pero seguimos buscando el archivo en la red
+            return cachedResponse || fetchPromise;
+        })
+    );
+});
+
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        clients.claim().then(() => {
+            // Enviar un mensaje a todas las páginas activas de la aplicación
+            clients.matchAll({ type: 'window' }).then((clients) => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'NEW_VERSION' });
+                });
+            });
+        })
+    );
+});
