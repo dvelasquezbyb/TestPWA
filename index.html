@@ -61,6 +61,18 @@
       });
     }
 
+
+    if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data.type === 'NEW_VERSION') {
+      // Mostrar notificación de actualización
+      alert('¡Hay una nueva versión disponible! Recarga la página para obtenerla.');
+      // O puedes mostrar un banner, notificación o modal personalizado
+    }
+  });
+}
+
+
   </script>
 
 
